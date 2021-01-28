@@ -15,9 +15,10 @@
 #MrMoola version, github link button corner
 #Hosts buttons for Contcts and finances
 ########### LIBRARIES ##################################
-from flexx import flx
+from PySide6 import QtCore, QtWidgets, QtGui
 import os.path
 import pathlib
+import random
 
 working_directory = pathlib.Path(__file__).parent.absolute()
 user_detail = str(working_directory) + "/user_data/"
@@ -36,22 +37,14 @@ except:
 
 for line in user_detail:
 	if "HATHAHEA-ALIAS" in line:
-		user_alias = line.split()[1])
+		user_alias = line.split()[1]
 
-#class abumoola_make(flx.Widget):
-#	def init(self):
-#		with flx.VBox():
-#		flx.Label(style='background:#cfc;', wrap=1,
-#		text='Here is some content at the top for which we want to '
-#		'use minimal size. Thus the use of a VBox. '
-#                        'Below is a splitter, with a box layout on the left '
-#                        'and a fix layout on the right.')
-#			flx.Button(text = "Contacts", flex = 1)
-#			flx.Button(text = "Finances", flex = 1)
-#
-#if __name__ == '__main__':
-#    m = flx.launch(abumoola_make)
-#    flx.run()
-#
-#mm_app = flx.App(abumoola_make)
-#app.export('AbuMoola.html', link=0)
+
+master = Tk(className="HOME")
+master.wm_title("AbuMoola")
+master.geometry('650x800'.format(900, 900))
+master.configure(bg='black')
+
+title = Label(master, text="Abu Moola",anchor='w')
+title.configure(foreground='white',bg='black',font=("Times",250),anchor='w')
+title.grid(row=0,column=0,columnspan=5)
