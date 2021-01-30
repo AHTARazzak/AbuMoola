@@ -29,23 +29,81 @@ def contact_page():
     #contacts.geometry('1000x800'.format(1000, 800))
     contacts.configure(bg = 'black')
 
-    Label(contacts, font = ("Times", 120), foreground = 'white', bg = 'black', text = user_alias + " Contacts").grid(row = 0, column = 1)
+    Label(contacts, font = ("Times", 120), foreground = 'white', bg = 'black', text = user_alias + " Contacts").grid(row = 0, column = 1, columnspan = 8)
 
     contacts.grid_rowconfigure(1, minsize = 30)
 
-    Label(contacts, font = ("Times", 50), foreground = 'white', bg = 'black', text = "Format: FirstName,LastName,Address,#1,#2,Email,Insta,Extra").grid(row = 1, column = 1)
+    con_updates = StringVar()
+    #Label(contacts, font = ("Times", 50), foreground = 'white', bg = 'black', text = con_updates).grid(row = 1, column = 1, columnspan = 8)
+    con_update_panel = Label(contacts, font = ("Times", 50), foreground = 'white', bg = 'black', textvariable = con_updates).grid(row = 1, column = 1, columnspan = 8)
     contacts.grid_rowconfigure(3, minsize = 30)
     #con_add = Button(contacts, text="+", font=("system", 60), width = 10, height = 2)
     #con_add.grid(row=2, column=1, columnspan = 5)
 
-    Button(contacts, font = ("Times", 50), width = 5, text = "Add", command = contact_add).grid(row = 2, column = 0)
-    con_add = Entry(contacts, font = ('Verdana',60), width = 40).grid(row = 2, column = 1)
+    Button(contacts, font = ("Times", 50), height = 2, width = 5, text = "Add", command = lambda : contact_add(first_text.get(), last_text.get(), address_text.get(), num_1_text.get(), num_2_text.get(), email_text.get(), insta_text.get(), extra_text.get(), con_updates)).grid(row = 2, column = 0, rowspan = 2)
 
-    Button(contacts, font = ("Times", 50), width = 5, text = "Remove", command = contact_remove).grid(row = 3, column = 0)
-    con_add = Entry(contacts, font = ('Verdana',60), width = 20).grid(row = 3, column = 1)
+    first_text = StringVar()
+    first_name_ent = Entry(contacts, textvariable = first_text, font = ('Verdana',60), width = 10).grid(row = 2, column = 1, columnspan = 1)
+    first_text.set("First Name")
 
-def contact_add():
-    print("nice")
+    last_text = StringVar()
+    last_name_ent = Entry(contacts, textvariable = last_text, font = ('Verdana',60), width = 10).grid(row = 3, column = 1, columnspan = 1)
+    last_text.set("Last Name")
+
+    address_text = StringVar()
+    addr_ent = Entry(contacts, textvariable = address_text, font = ('Verdana',60), width = 28).grid(row = 2, column = 2, columnspan = 2)
+    address_text.set("Address")
+
+    num_1_text = StringVar()
+    n1_ent = Entry(contacts, textvariable = num_1_text, font = ('Verdana',60), width = 14).grid(row = 3, column = 2, columnspan = 1)
+    num_1_text.set("Number #1")
+
+    num_2_text = StringVar()
+    n2_ent = Entry(contacts, textvariable = num_2_text, font = ('Verdana',60), width = 14).grid(row = 3, column = 3, columnspan = 1)
+    num_2_text.set("Number #2")
+
+    email_text = StringVar()
+    email_ent = Entry(contacts, textvariable = email_text, font = ('Verdana',60), width = 15).grid(row = 2, column = 4, columnspan = 1)
+    email_text.set("Email")
+
+    insta_text = StringVar()
+    insta_ent = Entry(contacts, textvariable = insta_text, font = ('Verdana',60), width = 15).grid(row = 3, column = 4, columnspan = 1)
+    insta_text.set("Instagram")
+
+    extra_text = StringVar()
+    extra_ent = Entry(contacts, textvariable = extra_text, font = ('Verdana',60), width = 15).grid(row = 2, column = 5, columnspan = 1)
+    extra_text.set("Extra")
+
+    Button(contacts, font = ("Times", 50), height = 2, width = 5, text = "Add", command = lambda : contact_remove(rem_text.get(), con_updates)).grid(row = 3, column = 5, rowspan = 1)
+    rem_text = StringVar()
+    rem_ent = Entry(contacts, textvariable = extra_text, font = ('Verdana',60), width = 15).grid(row = 2, column = 5, columnspan = 1)
+    rem_text.set("ID")
+
+    contacts.mainloop()
+
+def contact_add(first_name, last_name, address, num_1, num_2, email, insta, extra, update_this):
+    if (first_name =="First Name"):
+        update_this.set("Can't use default")
+    elif (len(first_name) < 1):
+        update_this.set("Need first name")
+    else:
+        try:
+            contact_detail_read = open(user_detail_path + "/contacts_details.txt", "r")
+            last_line = contact_detail_read.read().splitlines()[-1]
+            last_id = int(last_line.split("|")[0])
+            contact_detail_read.close()
+            contact_detail_append = open(user_detail_path + "/contacts_details.txt", "a")
+            contact_detail_append.write(str(last_id + 1) + "|" + first_name + "|" + last_name + "|" + address + "|" + num_1 + "|" + num_2 + "|" + email + "|" + insta + "|" + extra + "\n")
+            contact_detail_append.close()
+            update_this.set("Added " + first_name)
+        except:
+            contact_file = os.path.join(user_detail_path + "/contacts_details.txt")
+            contact_file_open = open(contact_file, "w")
+            contact_file_open.write("1|" + first_name + "|" + last_name + "|" + address + "|" + num_1 + "|" + num_2 + "|" + email + "|" + insta + "|" + extra + "\n")
+            contact_file_open.close()
+            update_this.set(first_name + " is your first contact !")
+
+def contact_remove()
 
 def main_clock():
     global time1
@@ -59,10 +117,10 @@ def main_clock():
 ########### PREPARTAION ##################################
 
 working_directory = pathlib.Path(__file__).parent.absolute()
-user_detail = str(working_directory) + "/user_data/"
+user_detail_path = str(working_directory) + "/user_data/"
 
 try:
-    user_detail = open(user_detail + "/user_details.txt", "r")
+    user_detail = open(user_detail_path + "/user_details.txt", "r")
 except:
     print("Please provide details (will need to enter once)")
     your_alias = input("How would you like Abu Moolah to address you? (< 20 characters please): ")
