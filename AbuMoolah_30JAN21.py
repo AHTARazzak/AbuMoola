@@ -98,6 +98,75 @@ def contact_page(page_open):
 
     contacts.mainloop()
 
+def fin_add_type(type_add, update_this):
+    if (type_add == "+ Type"):
+        update_this.set("Can't add default")
+    elif (len(type_add) < 1):
+        update_this.set("Need something")
+    else:
+        try:
+            type_detail_read = open(user_detail_path + "/types_included.txt", "r")
+            all_types = type_detail_read.read().split("|")[:-1]
+            type_detail_append = open(user_detail_path + "/types_included.txt", "a")
+            type_detail_append.write(type_add + "|")
+            type_detail_append.close()
+            update_this.set("Added " + type_add)
+        except:
+            type_file = os.path.join(user_detail_path + "/types_included.txt")
+            type_file_open = open(type_file, "w")
+            type_file_open.write(type_add + "|")
+            type_file_open.close()
+            update_this.set(type_add + " is your first type !")
+
+def fin_rem_type(type_rem, update_this):
+    new_types = ""
+    check_remove = False
+    if (type_rem == "- Type"):
+        update_this.set("Can't add default")
+    elif (len(type_rem) < 1):
+        update_this.set("Need something")
+    else:
+        try:
+            type_detail_read = open(user_detail_path + "/types_included.txt", "r")
+        except:
+            update_this.set("Nothing to remove " + type_rem)
+            END
+        all_types = type_detail_read.read().split("|")[:-1]
+        for entry in all_types:
+            if entry == type_rem:
+                update_this.set("Removed " + type_rem)
+                check_remove = True
+            else:
+                new_types += entry + "|"
+                type_detail_read.close()
+                type_detail_write = open(user_detail_path + "/types_included.txt", "w")
+                type_detail_write.write(new_types)
+                update_this.set("Removed " + type_rem)
+        if check_remove == False:
+            update_this.set(type_rem + " isn't a Type")
+
+def currency_pref(cur_pref, update_this):
+    update_cur_details = ""
+    user_detail_read = open(user_detail_path + "/user_details.txt", "r")
+    user_detil_contents = user_detail_read.read()
+    if "HATHAHEA-FLOOS" not in user_detil_contents:
+        user_detail_read.close()
+        user_detail_append = open(user_detail_path + "/user_details.txt", "a")
+        user_detail_append.write("\nHATHAHEA-FLOOS " + cur_pref)
+        user_detail_append.close()
+    else:
+        for line in user_detil_contents.splitlines():
+            if "HATHAHEA-FLOOS" in line:
+                print(line)
+                update_cur_details += "\nHATHAHEA-FLOOS " + cur_pref
+            else:
+                update_cur_details += line
+        user_detail_read.close()
+        user_detail_write = open(user_detail_path + "/user_details.txt", "w")
+        user_detail_write.write(update_cur_details)
+    update_this.set(cur_pref + " is now your primary currency")
+
+
 def finances_page(page_open):
     page_open.destroy()
     finances = Tk()
@@ -109,13 +178,46 @@ def finances_page(page_open):
     finances.grid_rowconfigure(1, minsize = 30)
 
     fin_updates = StringVar()
-    fin_updates_panel = Label(contacts, font = ("Times", 50), foreground = 'white', bg = 'black', textvariable = fin_updates).grid(row = 1, column = 1, columnspan = 8)
+    fin_updates_panel = Label(finances, font = ("Times", 50), foreground = 'white', bg = 'black', textvariable = fin_updates).grid(row = 1, column = 1, columnspan = 8)
 
     finances.grid_rowconfigure(3, minsize = 30)
 
+    Button(finances, font = ("Times", 50), height = 1, width = 9, text = "Add Type", command = lambda : fin_add_type(type_text.get(), fin_updates)).grid(row = 2, column = 0)
+
+    type_text = StringVar()
+    type_ent = Entry(finances, textvariable = type_text, font = ('Verdana',60), width = 9).grid(row = 2, column = 1, columnspan = 1)
+    type_text.set("+ Type")
+
+    Button(finances, font = ("Times", 50), height = 1, width = 11, text = "Remove Type", command = lambda : fin_rem_type(rem_type_text.get(), fin_updates)).grid(row = 2, column = 2)
+
+    rem_type_text = StringVar()
+    rem_type_ent = Entry(finances, textvariable = rem_type_text, font = ('Verdana',60), width = 9).grid(row = 2, column = 3, columnspan = 1)
+    rem_type_text.set("- Type")
+
+    Button(finances, font = ("Times", 50), height = 1, width = 14, text = "Pref. Currency", command = lambda : currency_pref(cur_pref_text.get(), fin_updates)).grid(row = 3, column = 0)
+
+    cur_pref_text = StringVar()
+    cur_pref_ent = Entry(finances, textvariable = cur_pref_text, font = ('Verdana',60), width = 9).grid(row = 3, column = 1, columnspan = 1)
+    cur_pref_text.set("Currency")
+    #Currency pref
+    #currency info
+
+
+
+    #Button(finances, font = ("Times", 50), height = 1, width = 15, text = "Remove entry", command = lambda : fin_add_type(type_text.get()).grid(row = 2, column = 0, rowspan = 1)
+
+    #type_text = StringVar()
+    #type_ent = Entry(contacts, textvariable = first_text, font = ('Verdana',60), width = 10).grid(row = 2, column = 1, columnspan = 1)
+    #type_text.set("")
+
+    #Button(finances, font = ("Times", 50), height = 1, width = 15, text = "Add Item Type", command = lambda : fin_add_type(type_text.get()).grid(row = 3, column = 0, rowspan = 1)
+
+    #type_text = StringVar()
+    #type_ent = Entry(contacts, textvariable = first_text, font = ('Verdana',60), width = 10).grid(row = 2, column = 1, columnspan = 1)
+    #type_text.set("")
 
 def contact_add(first_name, last_name, address, num_1, num_2, email, insta, extra, update_this):
-    if (first_name =="First Name"):
+    if (first_name == "First Name"):
         update_this.set("Can't use default")
     elif (len(first_name) < 1):
         update_this.set("Need first name")
@@ -178,10 +280,10 @@ except:
     your_alias = input("How would you like Abu Moolah to address you? (< 20 characters please): ")
     while len(your_alias) > 20:
         your_alias = input("How would you like Abu Moolah to address you? (< 20 characters please): ")
-    detail_file = os.path.join(user_detail + "user_details.txt")
-    detail_file_open = open(detail_file, "w")
+    detail_file_open = open(user_detail_path + "/user_details.txt", "w")
     detail_file_open.write("HATHAHEA-ALIAS " + your_alias)
     detail_file_open.close()
+    user_detail = open(user_detail_path + "/user_details.txt", "r")
 
 for line in user_detail:
     if "HATHAHEA-ALIAS" in line:
@@ -212,10 +314,9 @@ time1=""
 
 master.grid_rowconfigure(4, minsize=100)
 
-finance_but = Button(master, text="Finances", font=("system", 50), width = 20, height = 4).grid(row=5, column=0, columnspan = 5)
+finance_but = Button(master, text="Finances", font=("system", 50), width = 20, height = 4, command = lambda : finances_page(master)).grid(row=5, column=0, columnspan = 5)
 
-contact_but = Button(master, text="Contacts", font=("system", 50), width = 20, height = 4, command = lambda : contact_page(master))
-contact_but.grid(row=5, column=4, columnspan = 5)
+contact_but = Button(master, text="Contacts", font=("system", 50), width = 20, height = 4, command = lambda : contact_page(master)).grid(row=5, column=4, columnspan = 5)
 
 
 master.grid_rowconfigure(6, minsize=100)
