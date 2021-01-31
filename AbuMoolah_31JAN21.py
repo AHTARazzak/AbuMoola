@@ -17,6 +17,7 @@ from tkinter.font import Font
 from tkinter import scrolledtext
 import os.path, pathlib, random, time, os, sys
 from datetime import datetime
+from currency_converter import CurrencyConverter
 
 ########### GLOBALS ##################################
 global the_version
@@ -137,6 +138,7 @@ def fin_rem_type(type_rem, update_this):
 
 def currency_pref(cur_pref, update_this):
     update_cur_details = ""
+    update_item_list = ""
     user_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/user_data/user_details.txt", "r")
     user_detil_contents = user_detail_read.read()
     if cur_pref in currency_list:
@@ -152,6 +154,22 @@ def currency_pref(cur_pref, update_this):
                     update_cur_details += "\nHATHAHEA-FLOOS " + cur_pref
                 else:
                     update_cur_details += line
+            try:
+                item_list_change_curr = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/item_list.txt", "r")
+                for line in item_list_change_curr:
+                    split_this_line = line.split("|")
+                    line_value = split_this_line[2].split()[0]
+                    line_currency = split_this_line[2].split()[-1]
+                    new_value = str(curconv.convert(float(line_value), line_currency, cur_pref))
+                    new_value_2sf = new_value[:(new_value.find(".") + 3)]
+                    value_replace = "|" + new_value_2sf + " " + cur_pref +"|"
+                    update_item_list += split_this_line[0] + "|" + split_this_line[1] + value_replace + split_this_line[3] + "|" + split_this_line[4] + "|" + split_this_line[5] + "|" + split_this_line[6] + "\n"
+                    item_list_change_curr.close()
+                    item_list_write_curr = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/item_list.txt", "w")
+            except:
+                pass
+            item_list_write_curr.write(update_item_list)
+            item_list_write_curr.close()
             user_detail_read.close()
             user_detail_write = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/user_data/user_details.txt", "w")
             user_detail_write.write(update_cur_details)
@@ -181,16 +199,17 @@ def finances_page(page_open):
 
     fin_updates = StringVar()
     fin_updates_panel = Label(finances, font = ("Times", 50), foreground = 'white', bg = 'black', textvariable = fin_updates).grid(row = 1, column = 1, columnspan = 6)
+    fin_updates.set("Currency: " + user_curren)
 
     finances.grid_rowconfigure(3, minsize = 30)
 
-    Button(finances, font = ("Times", 50), height = 1, width = 9, text = "Add Type", command = lambda : fin_add_type(type_text.get(), fin_updates)).grid(row = 2, column = 0)
+    Button(finances, font = ("Times", 50), height = 1, width = 14, text = "Add Type", command = lambda : fin_add_type(type_text.get(), fin_updates)).grid(row = 2, column = 0)
 
     type_text = StringVar()
     type_ent = Entry(finances, textvariable = type_text, font = ('Verdana',60), width = 9).grid(row = 2, column = 1, columnspan = 1)
     type_text.set("+ Type")
 
-    Button(finances, font = ("Times", 50), height = 1, width = 11, text = "Remove Type", command = lambda : fin_rem_type(rem_type_text.get(), fin_updates)).grid(row = 2, column = 2)
+    Button(finances, font = ("Times", 50), height = 1, width = 14, text = "Remove Type", command = lambda : fin_rem_type(rem_type_text.get(), fin_updates)).grid(row = 2, column = 2)
 
     rem_type_text = StringVar()
     rem_type_ent = Entry(finances, textvariable = rem_type_text, font = ('Verdana',60), width = 9).grid(row = 2, column = 3, columnspan = 1)
@@ -202,9 +221,9 @@ def finances_page(page_open):
     cur_pref_ent = Entry(finances, textvariable = cur_pref_text, font = ('Verdana',60), width = 9).grid(row = 3, column = 1, columnspan = 1)
     cur_pref_text.set("Currency")
 
-    Button(finances, font = ("Times", 50), height = 1, width = 14, text = "Currency List", command = lambda : currency_stuff()).grid(row = 3, column = 2, columnspan = 2)
+    Button(finances, font = ("Times", 50), height = 1, width = 14, text = "Currency List", command = lambda : currency_stuff()).grid(row = 3, column = 2, columnspan = 1)
 
-    Button(finances, font = ("Times", 50), height = 1, width = 8, text = "Add Item", command = lambda : item_add(item_text.get(), amount_text.get(), location_text.get(), type_opt_text.get(), time_text.get(), fin_updates)).grid(row = 4, column = 0, columnspan = 2)
+    Button(finances, font = ("Times", 50), height = 1, width = 14, text = "Add Item", command = lambda : item_add(item_text.get(), amount_text.get(), location_text.get(), type_opt_text.get(), time_text.get(), fin_updates)).grid(row = 4, column = 0, columnspan = 1)
 
     item_text = StringVar()
     item_ent = Entry(finances, textvariable = item_text, font = ('Verdana',60), width = 9).grid(row = 4, column = 1, columnspan = 1)
@@ -222,12 +241,18 @@ def finances_page(page_open):
         all_types_here = these_types.read().split("|")[:-1]
 
     type_opt_text = StringVar()
-    type_opts = OptionMenu(finances, type_opt_text, *all_types_here).grid(row = 4, column = 4, columnspan = 1)
+    type_opts = OptionMenu(finances, type_opt_text, *all_types_here).grid(row = 4, column = 4)
     type_opt_text.set(str(all_types_here[0]))
 
     time_text = StringVar()
-    time_ent = Entry(finances, textvariable = time_text, font = ('Verdana',60), width = 9).grid(row = 4, column = 5, columnspan = 1)
+    time_ent = Entry(finances, textvariable = time_text, font = ('Verdana',60), width = 9).grid(row = 4, column = 5)
     time_text.set("HH:MM:SS")
+
+    Button(finances, font = ("Times", 50), height = 1, width = 9, text = "Rem. Item", command = lambda : item_remove(rem_text.get(), fin_updates)).grid(row = 3, column = 4)
+
+    rem_text = StringVar()
+    rem_ent = Entry(finances, textvariable = rem_text, font = ('Verdana',60), width = 5).grid(row = 3, column = 5)
+    rem_text.set("ID")
 
     try:
         item_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/item_list.txt", "r")
@@ -237,15 +262,39 @@ def finances_page(page_open):
         item_output.configure(background="white", foreground = "black", font = ("Times", 50), wrap= 'word')
         item_output.insert(END, item_to_show)
     except:
-        fin_updates.set("No list of contacts to show")
+        fin_updates.set("No list of finances to show")
 
     Label(finances, text = the_version, foreground='white', bg='black', font=("system", 40), height = 1).grid(row=6, column=0, columnspan = 2)
     Button(finances, font = ("Times", 50), height = 1, width = 10, text = "Refresh", command = lambda : finances_page(finances)).grid(row = 6, column = 2, columnspan = 1)
     Button(finances, font = ("Times", 50), height = 1, width = 10, text = "Contacts", command = lambda : contact_page(finances)).grid(row = 6, column = 4, columnspan = 1)
+
     #last x entries
     #specific month
-    #Remove ID
-    #Button(finances, font = ("Times", 50), height = 1, width = 10, text = "Analytics", command = lambda : finances_page(contacts)).grid(row = 6, column = 6, columnspan = 2)
+
+def item_remove(remove_this, update_this):
+    new_items = ""
+    if (remove_this == "ID"):
+        update_this.set("Can't remove default")
+    else:
+        try:
+            items_detail_read = open(str(working_directory) + "/" + user_alias + "/item_list.txt", "r")
+            print("1")
+            for line in items_detail_read:
+                checkline = line.split('|')
+                if checkline[0] == remove_this:
+                    this_guy = checkline[1] + " " + checkline[2]
+                    pass
+                else:
+                    new_items += line
+            print("2")
+            items_detail_read.close()
+            print("3")
+            items_detail_write = open(str(working_directory) + "/" + user_alias + "/item_list.txt", "w")
+            items_detail_write.write(new_items)
+            items_detail_write.close()
+            update_this.set(this_guy + "was removed.")
+        except:
+            update_this.set("Something went wrong")
 
 def item_add(the_item, the_amount, the_location, the_type, time_text, update_this):
     if (the_item == "Item"):
@@ -259,13 +308,13 @@ def item_add(the_item, the_amount, the_location, the_type, time_text, update_thi
             last_id = int(last_line.split("|")[0])
             item_detail_read.close()
             item_detail_append = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/item_list.txt", "a")
-            item_detail_append.write(str(last_id + 1) + "|" + the_item + "|" + the_amount + "|" + the_location + "|" + the_type + "|" + time_text + "|" +  today.strftime("%d/%m/%Y") + "\n")
+            item_detail_append.write(str(last_id + 1) + "|" + the_item + "|" + the_amount + " " + user_curren + "|" + the_location + "|" + the_type + "|" + time_text + "|" +  today.strftime("%d/%m/%Y") + "\n")
             item_detail_append.close()
             update_this.set("Added " + the_item)
         except:
             item_file = os.path.join(str(working_directory) + "/" + your_alias.replace(" ","") + "/item_list.txt")
             item_file_open = open(item_file, "w")
-            item_file_open.write("1|" + the_item + "|" + the_amount + "|" + the_location + "|" + the_type + "|" + time_text + "|" +  today.strftime("%d/%m/%Y") + "\n")
+            item_file_open.write("1|" + the_item + "|" + the_amount + " " + user_curren + "|" + the_location + "|" + the_type + "|" + time_text + "|" +  today.strftime("%d/%m/%Y") + "\n")
             item_file_open.close()
             update_this.set(the_item + " is your first item !")
 
@@ -331,13 +380,14 @@ def main_clock():
 
 ########### PREPARTAION ##################################
 currency_list = ["MYR", "ISK", "EEK", "HKD", "IDR", "CAD", "HUF", "PLN", "BRL", "MXN", "NOK", "BGN", "THB", "HRK", "CZK", "DKK", "CYP", "RUB", "PHP", "ILS", "EUR", "TRL", "SEK", "TRY", "LTL", "MTL", "AUD", "SGD", "KRW", "LVL", "SKK", "ZAR", "JPY", "RON", "ROL", "NZD", "GBP", "CHF", "USD", "CNY", "INR", "SIT"]
-
+curconv = CurrencyConverter()
 working_directory = pathlib.Path(__file__).parent.absolute()
+
 
 user_status = input("Enter '1' if exiting user or '2' if new: ")
 
 if user_status == "1":
-    your_alias = input("What is your exisiting alis?: ")
+    your_alias = input("What is your exisiting user name?: ")
     user_detail_path = str(working_directory) + "/" + your_alias.replace(" ","") + "/user_data/"
     user_detail = open(str(working_directory) + "/" + your_alias + "/user_data/user_details.txt", "r")
 elif user_status == "2":
@@ -348,7 +398,7 @@ elif user_status == "2":
     while len(your_alias) > 20:
         your_alias = input("How would you like Abu Moolah to address you? (< 20 characters please): ")
     detail_file_open = open(str(working_directory) + "/" + your_alias + "/user_data/user_details.txt", "w")
-    detail_file_open.write("HATHAHEA-ALIAS " + your_alias)
+    detail_file_open.write("HATHAHEA-ALIAS " + your_alias + "\nHATHAHEA-FLOOS NZD" )
     detail_file_open.close()
     user_detail = open(str(working_directory) + "/" + your_alias + "/user_data/user_details.txt", "r")
 else:
@@ -358,6 +408,8 @@ else:
 for line in user_detail:
     if "HATHAHEA-ALIAS" in line:
         user_alias = line.split()[1]
+    if "HATHAHEA-FLOOS" in line:
+        user_curren = line.split()[1]
 
 with open(str(working_directory) + "/random_deco/greetings.txt", "r") as the_greetings:
     greetings_contents = the_greetings.read().split("\n")

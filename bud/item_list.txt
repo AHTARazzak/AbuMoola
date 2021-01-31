@@ -1,0 +1,4 @@
+1|qwffwq|Amount NZD|Location|Food|HH:MM:SS|31/01/2021
+3|qwffwq|Amount NZD|Location|Food|HH:MM:SS|31/01/2021
+4|qwffwq|Amount NZD|Location|Food|HH:MM:SS|31/01/2021
+6|qwffwq|Amount NZD|Location|Food|HH:MM:SS|31/01/2021
