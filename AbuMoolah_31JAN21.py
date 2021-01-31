@@ -150,7 +150,6 @@ def currency_pref(cur_pref, update_this):
         else:
             for line in user_detil_contents.splitlines():
                 if "HATHAHEA-FLOOS" in line:
-                    print(line)
                     update_cur_details += "\nHATHAHEA-FLOOS " + cur_pref
                 else:
                     update_cur_details += line
@@ -167,7 +166,7 @@ def currency_pref(cur_pref, update_this):
                     item_list_change_curr.close()
                     item_list_write_curr = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/item_list.txt", "w")
             except:
-                pass
+                update_this.set("Something went wrong")
             item_list_write_curr.write(update_item_list)
             item_list_write_curr.close()
             user_detail_read.close()
@@ -230,8 +229,8 @@ def finances_page(page_open):
     item_text.set("Item")
 
     amount_text = StringVar()
-    amount_ent = Entry(finances, textvariable = amount_text, font = ('Verdana',60), width = 9).grid(row = 4, column = 2, columnspan = 1)
-    amount_text.set("Amount")
+    amount_ent = Entry(finances, textvariable = amount_text, font = ('Verdana',60), width = 11).grid(row = 4, column = 2, columnspan = 1)
+    amount_text.set("Amount ($$.CC)")
 
     location_text = StringVar()
     location_ent = Entry(finances, textvariable = location_text, font = ('Verdana',60), width = 9).grid(row = 4, column = 3, columnspan = 1)
@@ -254,22 +253,93 @@ def finances_page(page_open):
     rem_ent = Entry(finances, textvariable = rem_text, font = ('Verdana',60), width = 5).grid(row = 3, column = 5)
     rem_text.set("ID")
 
+    Button(finances, font = ("Times", 50), height = 1, width = 14, text = "All Items", command = lambda : all_items(fin_updates, finances)).grid(row = 5, column = 0)
+
+    Button(finances, font = ("Times", 50), height = 1, width = 14, text = "Last X items", command = lambda : last_x_items(last_items_text.get(), fin_updates, finances)).grid(row = 5, column = 1)
+
+    last_items_text = StringVar()
+    last_items_ent = Entry(finances, textvariable = last_items_text, font = ('Verdana',60), width = 10).grid(row = 5, column = 2)
+    last_items_text.set("Number")
+
+    Button(finances, font = ("Times", 50), height = 1, width = 14, text = "Pick month", command = lambda : pick_month(pick_month_text.get(), fin_updates, finances)).grid(row = 5, column = 3)
+
+    pick_month_text = StringVar()
+    pick_month_ent = Entry(finances, textvariable = pick_month_text, font = ('Verdana',60), width = 10).grid(row = 5, column = 4)
+    pick_month_text.set("MM/YYYY")
+
     try:
         item_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/item_list.txt", "r")
-        item_to_show = "ID - Item - Amount - Location - Type - Time - Date\n" + item_detail_read.read().replace("|"," - ")
+        item_to_show = "ID - Item - Amount - Location - Type - Time - Date\n"
+        item_to_show_split_lines = item_detail_read.read().splitlines()
+        length_of_items = len(item_to_show_split_lines)
+        for entry in range(1, length_of_items + 1):
+            item_to_show += (item_to_show_split_lines[-1 * entry]).replace("|"," - ") + "\n"
         item_output = scrolledtext.ScrolledText(finances, height=10)
-        item_output.grid(column=0, row=5, columnspan = 6)
+        item_output.grid(column=0, row=6, columnspan = 6)
         item_output.configure(background="white", foreground = "black", font = ("Times", 50), wrap= 'word')
         item_output.insert(END, item_to_show)
     except:
         fin_updates.set("No list of finances to show")
 
-    Label(finances, text = the_version, foreground='white', bg='black', font=("system", 40), height = 1).grid(row=6, column=0, columnspan = 2)
-    Button(finances, font = ("Times", 50), height = 1, width = 10, text = "Refresh", command = lambda : finances_page(finances)).grid(row = 6, column = 2, columnspan = 1)
-    Button(finances, font = ("Times", 50), height = 1, width = 10, text = "Contacts", command = lambda : contact_page(finances)).grid(row = 6, column = 4, columnspan = 1)
+    Label(finances, text = the_version, foreground='white', bg='black', font=("system", 40), height = 1).grid(row=7, column=0, columnspan = 2)
+    Button(finances, font = ("Times", 50), height = 1, width = 10, text = "Refresh", command = lambda : finances_page(finances)).grid(row = 7, column = 2, columnspan = 1)
+    Button(finances, font = ("Times", 50), height = 1, width = 10, text = "Contacts", command = lambda : contact_page(finances)).grid(row = 7, column = 4, columnspan = 1)
 
-    #last x entries
-    #specific month
+def pick_month(this_month, update_this, this_page):
+    item_to_show_temp = ""
+    item_to_show = ""
+    try:
+        item_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/item_list.txt", "r")
+        item_to_show = "ID - Item - Amount - Location - Type - Time - Date\n"
+        item_to_show_split_lines = item_detail_read.read().splitlines()
+        for entry in item_to_show_split_lines:
+            if this_month in entry.split("|")[-1]:
+                item_to_show_temp += entry + "\n"
+        length_of_items = len(item_to_show_temp.splitlines())
+        for entry in range(1, length_of_items + 1):
+            item_to_show += (item_to_show_split_lines[-1 * entry]).replace("|"," - ") + "\n"
+        item_output = scrolledtext.ScrolledText(this_page, height=10)
+        item_output.grid(column=0, row=6, columnspan = 6)
+        item_output.configure(background="white", foreground = "black", font = ("Times", 50), wrap= 'word')
+        item_output.insert(END, item_to_show)
+    except:
+        update_this.set("No list of finances to show")
+
+def all_items(update_this, this_page):
+    try:
+        item_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/item_list.txt", "r")
+        item_to_show = "ID - Item - Amount - Location - Type - Time - Date\n"
+        item_to_show_split_lines = item_detail_read.read().splitlines()
+        length_of_items = len(item_to_show_split_lines)
+        for entry in range(1, length_of_items + 1):
+            item_to_show += (item_to_show_split_lines[-1 * entry]).replace("|"," - ") + "\n"
+        item_output = scrolledtext.ScrolledText(this_page, height=10)
+        item_output.grid(column=0, row=6, columnspan = 6)
+        item_output.configure(background="white", foreground = "black", font = ("Times", 50), wrap= 'word')
+        item_output.insert(END, item_to_show)
+    except:
+        update_this.set("No list of finances to show")
+
+def last_x_items(num_items, update_this, this_page):
+    show_this = "ID - Item - Amount - Location - Type - Time - Date\n"
+    try:
+        item_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/item_list.txt", "r")
+        item_detail_lines = item_detail_read.read().splitlines()
+        print(len(item_detail_lines))
+        if int(num_items) > len(item_detail_lines):
+            the_item_length = len(item_detail_lines)
+        else:
+            the_item_length = int(num_items)
+        print(the_item_length)
+        for entry in range(1, the_item_length + 1):
+            print(entry)
+            show_this += item_detail_lines[-1*(entry)].replace("|"," - ") + "\n"
+        item_output = scrolledtext.ScrolledText(this_page, height=10)
+        item_output.grid(column=0, row=6, columnspan = 6)
+        item_output.configure(background="white", foreground = "black", font = ("Times", 50), wrap= 'word')
+        item_output.insert(END, show_this)
+    except:
+        update_this.set("No list of finances to show")
 
 def item_remove(remove_this, update_this):
     new_items = ""
@@ -301,6 +371,8 @@ def item_add(the_item, the_amount, the_location, the_type, time_text, update_thi
         update_this.set("Can't use default")
     elif (len(the_item) < 1):
         update_this.set("Need first name")
+    elif not isinstance(float(the_amount), float):
+        update_this.set("Must be a floating number ('$$.CC')")
     else:
         try:
             item_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/item_list.txt", "r")
