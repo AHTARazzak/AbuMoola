@@ -10,10 +10,7 @@
 #    By AHTAR
 #
 ########### TO DO ######################################
-#Landing page with randomly generated greeting
-#Landing page hosts time
-#MrMoola version, github link button corner
-#Hosts buttons for Contcts and finances
+#Contacts list ID properly
 ########### LIBRARIES ##################################
 from tkinter import *
 from tkinter.font import Font
@@ -81,7 +78,7 @@ def contact_page(page_open):
     rem_text.set("ID")
 
     try:
-        contact_detail_read = open(user_detail_path + "/contacts_details.txt", "r")
+        contact_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/contacts_details.txt", "r")
         contacts_to_show = "ID|FirstName|LastName|Addresss|#1|#2|Email|Insta|Extra\n" + contact_detail_read.read()
         con_output = scrolledtext.ScrolledText(contacts, height=10)
         con_output.grid(column=1, row=4, columnspan = 6)
@@ -105,14 +102,14 @@ def fin_add_type(type_add, update_this):
         update_this.set("Need something")
     else:
         try:
-            type_detail_read = open(user_detail_path + "/types_included.txt", "r")
+            type_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/types_included.txt", "r")
             all_types = type_detail_read.read().split("|")[:-1]
-            type_detail_append = open(user_detail_path + "/types_included.txt", "a")
+            type_detail_append = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/types_included.txt", "a")
             type_detail_append.write(type_add + "|")
             type_detail_append.close()
             update_this.set("Added " + type_add)
         except:
-            type_file = os.path.join(user_detail_path + "/types_included.txt")
+            type_file = os.path.join(str(working_directory) + "/" + your_alias.replace(" ","") + "/types_included.txt")
             type_file_open = open(type_file, "w")
             type_file_open.write(type_add + "|")
             type_file_open.close()
@@ -127,7 +124,7 @@ def fin_rem_type(type_rem, update_this):
         update_this.set("Need something")
     else:
         try:
-            type_detail_read = open(user_detail_path + "/types_included.txt", "r")
+            type_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/types_included.txt", "r")
         except:
             update_this.set("Nothing to remove " + type_rem)
             END
@@ -139,7 +136,7 @@ def fin_rem_type(type_rem, update_this):
             else:
                 new_types += entry + "|"
                 type_detail_read.close()
-                type_detail_write = open(user_detail_path + "/types_included.txt", "w")
+                type_detail_write = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/types_included.txt", "w")
                 type_detail_write.write(new_types)
                 update_this.set("Removed " + type_rem)
         if check_remove == False:
@@ -147,11 +144,11 @@ def fin_rem_type(type_rem, update_this):
 
 def currency_pref(cur_pref, update_this):
     update_cur_details = ""
-    user_detail_read = open(user_detail_path + "/user_details.txt", "r")
+    user_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/user_data/user_details.txt", "r")
     user_detil_contents = user_detail_read.read()
     if "HATHAHEA-FLOOS" not in user_detil_contents:
         user_detail_read.close()
-        user_detail_append = open(user_detail_path + "/user_details.txt", "a")
+        user_detail_append = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/user_data/user_details.txt", "a")
         user_detail_append.write("\nHATHAHEA-FLOOS " + cur_pref)
         user_detail_append.close()
     else:
@@ -162,7 +159,7 @@ def currency_pref(cur_pref, update_this):
             else:
                 update_cur_details += line
         user_detail_read.close()
-        user_detail_write = open(user_detail_path + "/user_details.txt", "w")
+        user_detail_write = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/user_data/user_details.txt", "w")
         user_detail_write.write(update_cur_details)
     update_this.set(cur_pref + " is now your primary currency")
 
@@ -199,10 +196,13 @@ def finances_page(page_open):
     cur_pref_text = StringVar()
     cur_pref_ent = Entry(finances, textvariable = cur_pref_text, font = ('Verdana',60), width = 9).grid(row = 3, column = 1, columnspan = 1)
     cur_pref_text.set("Currency")
-    #Currency pref
+
+    #include check that it's a real currency
     #currency info
-
-
+    #options for last x days
+    #options between two dates
+    #text window with inputs
+    #buttons at bottom (version, refresh, contacts, analytics)
 
     #Button(finances, font = ("Times", 50), height = 1, width = 15, text = "Remove entry", command = lambda : fin_add_type(type_text.get()).grid(row = 2, column = 0, rowspan = 1)
 
@@ -223,16 +223,16 @@ def contact_add(first_name, last_name, address, num_1, num_2, email, insta, extr
         update_this.set("Need first name")
     else:
         try:
-            contact_detail_read = open(user_detail_path + "/contacts_details.txt", "r")
+            contact_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/contacts_details.txt", "r")
             last_line = contact_detail_read.read().splitlines()[-1]
             last_id = int(last_line.split("|")[0])
             contact_detail_read.close()
-            contact_detail_append = open(user_detail_path + "/contacts_details.txt", "a")
+            contact_detail_append = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/contacts_details.txt", "a")
             contact_detail_append.write(str(last_id + 1) + "|" + first_name + "|" + last_name + "|" + address + "|" + num_1 + "|" + num_2 + "|" + email + "|" + insta + "|" + extra + "\n")
             contact_detail_append.close()
             update_this.set("Added " + first_name)
         except:
-            contact_file = os.path.join(user_detail_path + "/contacts_details.txt")
+            contact_file = os.path.join(str(working_directory) + "/" + your_alias.replace(" ","") + "/contacts_details.txt")
             contact_file_open = open(contact_file, "w")
             contact_file_open.write("1|" + first_name + "|" + last_name + "|" + address + "|" + num_1 + "|" + num_2 + "|" + email + "|" + insta + "|" + extra + "\n")
             contact_file_open.close()
@@ -244,7 +244,7 @@ def contact_remove(remove_this, update_this):
         update_this.set("Can't remove default")
     else:
         try:
-            contact_detail_read = open(user_detail_path + "/contacts_details.txt", "r")
+            contact_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/contacts_details.txt", "r")
             for line in contact_detail_read:
                 checkline = line.split('|')
                 if checkline[0] == remove_this:
@@ -253,7 +253,7 @@ def contact_remove(remove_this, update_this):
                 else:
                     new_contacts += line
             contact_detail_read.close()
-            contact_detail_write = open(user_detail_path + "/contacts_details.txt", "w")
+            contact_detail_write = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/contacts_details.txt", "w")
             contact_detail_write.write(new_contacts)
             update_this.set(this_guy + "was removed.")
         except:
@@ -271,19 +271,27 @@ def main_clock():
 ########### PREPARTAION ##################################
 
 working_directory = pathlib.Path(__file__).parent.absolute()
-user_detail_path = str(working_directory) + "/user_data/"
 
-try:
-    user_detail = open(user_detail_path + "/user_details.txt", "r")
-except:
-    print("Please provide details (will need to enter once)")
+user_status = input("Enter '1' if exiting user or '2' if new: ")
+
+if user_status == "1":
+    your_alias = input("What is your exisiting alis?: ")
+    user_detail_path = str(working_directory) + "/" + your_alias.replace(" ","") + "/user_data/"
+    user_detail = open(str(working_directory) + "/" + your_alias + "/user_data/user_details.txt", "r")
+elif user_status == "2":
     your_alias = input("How would you like Abu Moolah to address you? (< 20 characters please): ")
+    os.system("mkdir " + your_alias.replace(" ",""))
+    os.system("mkdir " + your_alias.replace(" ","") + "/user_data")
+    os.system("mkdir " + your_alias.replace(" ","") + "/random_deco")
     while len(your_alias) > 20:
         your_alias = input("How would you like Abu Moolah to address you? (< 20 characters please): ")
-    detail_file_open = open(user_detail_path + "/user_details.txt", "w")
+    detail_file_open = open(str(working_directory) + "/" + your_alias + "/user_data/user_details.txt", "w")
     detail_file_open.write("HATHAHEA-ALIAS " + your_alias)
     detail_file_open.close()
-    user_detail = open(user_detail_path + "/user_details.txt", "r")
+    user_detail = open(str(working_directory) + "/" + your_alias + "/user_data/user_details.txt", "r")
+else:
+    print("1 or 2 please.")
+    exit()
 
 for line in user_detail:
     if "HATHAHEA-ALIAS" in line:
