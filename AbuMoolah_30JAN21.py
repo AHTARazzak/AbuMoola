@@ -21,7 +21,7 @@ from datetime import datetime
 ########### GLOBALS ##################################
 global the_version
 the_version = "AbuMoola (version 0) by AHTAR"
-
+today = datetime.today()
 ########### FUNCTIONS ##################################
 def contact_page(page_open):
     page_open.destroy()
@@ -79,7 +79,7 @@ def contact_page(page_open):
 
     try:
         contact_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/contacts_details.txt", "r")
-        contacts_to_show = "ID|FirstName|LastName|Addresss|#1|#2|Email|Insta|Extra\n" + contact_detail_read.read()
+        contacts_to_show = "ID - FirstName - LastName - Addresss - #1 - #2 - Email - Insta - Extra\n" + contact_detail_read.read().replace("|", " - ")
         con_output = scrolledtext.ScrolledText(contacts, height=10)
         con_output.grid(column=1, row=4, columnspan = 6)
         con_output.configure(background="white", foreground = "black", font = ("Times", 50), wrap= 'word')
@@ -101,19 +101,12 @@ def fin_add_type(type_add, update_this):
     elif (len(type_add) < 1):
         update_this.set("Need something")
     else:
-        try:
-            type_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/types_included.txt", "r")
-            all_types = type_detail_read.read().split("|")[:-1]
-            type_detail_append = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/types_included.txt", "a")
-            type_detail_append.write(type_add + "|")
-            type_detail_append.close()
-            update_this.set("Added " + type_add)
-        except:
-            type_file = os.path.join(str(working_directory) + "/" + your_alias.replace(" ","") + "/types_included.txt")
-            type_file_open = open(type_file, "w")
-            type_file_open.write(type_add + "|")
-            type_file_open.close()
-            update_this.set(type_add + " is your first type !")
+        type_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/types_included.txt", "r")
+        all_types = type_detail_read.read().split("|")[:-1]
+        type_detail_append = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/types_included.txt", "a")
+        type_detail_append.write(type_add + "|")
+        type_detail_append.close()
+        update_this.set("Added " + type_add)
 
 def fin_rem_type(type_rem, update_this):
     new_types = ""
@@ -146,22 +139,25 @@ def currency_pref(cur_pref, update_this):
     update_cur_details = ""
     user_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/user_data/user_details.txt", "r")
     user_detil_contents = user_detail_read.read()
-    if "HATHAHEA-FLOOS" not in user_detil_contents:
-        user_detail_read.close()
-        user_detail_append = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/user_data/user_details.txt", "a")
-        user_detail_append.write("\nHATHAHEA-FLOOS " + cur_pref)
-        user_detail_append.close()
+    if cur_pref in currency_list:
+        if "HATHAHEA-FLOOS" not in user_detil_contents:
+            user_detail_read.close()
+            user_detail_append = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/user_data/user_details.txt", "a")
+            user_detail_append.write("\nHATHAHEA-FLOOS " + cur_pref)
+            user_detail_append.close()
+        else:
+            for line in user_detil_contents.splitlines():
+                if "HATHAHEA-FLOOS" in line:
+                    print(line)
+                    update_cur_details += "\nHATHAHEA-FLOOS " + cur_pref
+                else:
+                    update_cur_details += line
+            user_detail_read.close()
+            user_detail_write = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/user_data/user_details.txt", "w")
+            user_detail_write.write(update_cur_details)
+        update_this.set(cur_pref + " is now your primary currency")
     else:
-        for line in user_detil_contents.splitlines():
-            if "HATHAHEA-FLOOS" in line:
-                print(line)
-                update_cur_details += "\nHATHAHEA-FLOOS " + cur_pref
-            else:
-                update_cur_details += line
-        user_detail_read.close()
-        user_detail_write = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/user_data/user_details.txt", "w")
-        user_detail_write.write(update_cur_details)
-    update_this.set(cur_pref + " is now your primary currency")
+        update_this.set(cur_pref + " is not a valid currency")
 
 
 def finances_page(page_open):
@@ -170,12 +166,21 @@ def finances_page(page_open):
     finances.wm_title("AbuMoola - Finances")
     finances.configure(bg = 'black')
 
-    Label(finances, font = ("Times", 120), foreground = 'white', bg = 'black', text = user_alias + " Finances").grid(row = 0, column = 1, columnspan = 8)
+    try:
+        test_open = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/types_included.txt", "r")
+        test_open.close()
+    except:
+        type_file = os.path.join(str(working_directory) + "/" + your_alias.replace(" ","") + "/types_included.txt")
+        type_file_open = open(type_file, "w")
+        type_file_open.write("Food|")
+        type_file_open.close()
+
+    Label(finances, font = ("Times", 120), foreground = 'white', bg = 'black', text = user_alias + " Finances").grid(row = 0, column = 0, columnspan = 6)
 
     finances.grid_rowconfigure(1, minsize = 30)
 
     fin_updates = StringVar()
-    fin_updates_panel = Label(finances, font = ("Times", 50), foreground = 'white', bg = 'black', textvariable = fin_updates).grid(row = 1, column = 1, columnspan = 8)
+    fin_updates_panel = Label(finances, font = ("Times", 50), foreground = 'white', bg = 'black', textvariable = fin_updates).grid(row = 1, column = 1, columnspan = 6)
 
     finances.grid_rowconfigure(3, minsize = 30)
 
@@ -197,24 +202,80 @@ def finances_page(page_open):
     cur_pref_ent = Entry(finances, textvariable = cur_pref_text, font = ('Verdana',60), width = 9).grid(row = 3, column = 1, columnspan = 1)
     cur_pref_text.set("Currency")
 
-    #include check that it's a real currency
-    #currency info
-    #options for last x days
-    #options between two dates
-    #text window with inputs
-    #buttons at bottom (version, refresh, contacts, analytics)
+    Button(finances, font = ("Times", 50), height = 1, width = 14, text = "Currency List", command = lambda : currency_stuff()).grid(row = 3, column = 2, columnspan = 2)
 
-    #Button(finances, font = ("Times", 50), height = 1, width = 15, text = "Remove entry", command = lambda : fin_add_type(type_text.get()).grid(row = 2, column = 0, rowspan = 1)
+    Button(finances, font = ("Times", 50), height = 1, width = 8, text = "Add Item", command = lambda : item_add(item_text.get(), amount_text.get(), location_text.get(), type_opt_text.get(), time_text.get(), fin_updates)).grid(row = 4, column = 0, columnspan = 2)
 
-    #type_text = StringVar()
-    #type_ent = Entry(contacts, textvariable = first_text, font = ('Verdana',60), width = 10).grid(row = 2, column = 1, columnspan = 1)
-    #type_text.set("")
+    item_text = StringVar()
+    item_ent = Entry(finances, textvariable = item_text, font = ('Verdana',60), width = 9).grid(row = 4, column = 1, columnspan = 1)
+    item_text.set("Item")
 
-    #Button(finances, font = ("Times", 50), height = 1, width = 15, text = "Add Item Type", command = lambda : fin_add_type(type_text.get()).grid(row = 3, column = 0, rowspan = 1)
+    amount_text = StringVar()
+    amount_ent = Entry(finances, textvariable = amount_text, font = ('Verdana',60), width = 9).grid(row = 4, column = 2, columnspan = 1)
+    amount_text.set("Amount")
 
-    #type_text = StringVar()
-    #type_ent = Entry(contacts, textvariable = first_text, font = ('Verdana',60), width = 10).grid(row = 2, column = 1, columnspan = 1)
-    #type_text.set("")
+    location_text = StringVar()
+    location_ent = Entry(finances, textvariable = location_text, font = ('Verdana',60), width = 9).grid(row = 4, column = 3, columnspan = 1)
+    location_text.set("Location")
+
+    with open(str(working_directory) + "/" + your_alias.replace(" ","") + "/types_included.txt", "r") as these_types:
+        all_types_here = these_types.read().split("|")[:-1]
+
+    type_opt_text = StringVar()
+    type_opts = OptionMenu(finances, type_opt_text, *all_types_here).grid(row = 4, column = 4, columnspan = 1)
+    type_opt_text.set(str(all_types_here[0]))
+
+    time_text = StringVar()
+    time_ent = Entry(finances, textvariable = time_text, font = ('Verdana',60), width = 9).grid(row = 4, column = 5, columnspan = 1)
+    time_text.set("HH:MM:SS")
+
+    try:
+        item_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/item_list.txt", "r")
+        item_to_show = "ID - Item - Amount - Location - Type - Time - Date\n" + item_detail_read.read().replace("|"," - ")
+        item_output = scrolledtext.ScrolledText(finances, height=10)
+        item_output.grid(column=0, row=5, columnspan = 6)
+        item_output.configure(background="white", foreground = "black", font = ("Times", 50), wrap= 'word')
+        item_output.insert(END, item_to_show)
+    except:
+        fin_updates.set("No list of contacts to show")
+
+    Label(finances, text = the_version, foreground='white', bg='black', font=("system", 40), height = 1).grid(row=6, column=0, columnspan = 2)
+    Button(finances, font = ("Times", 50), height = 1, width = 10, text = "Refresh", command = lambda : finances_page(finances)).grid(row = 6, column = 2, columnspan = 1)
+    Button(finances, font = ("Times", 50), height = 1, width = 10, text = "Contacts", command = lambda : contact_page(finances)).grid(row = 6, column = 4, columnspan = 1)
+    #last x entries
+    #specific month
+    #Remove ID
+    #Button(finances, font = ("Times", 50), height = 1, width = 10, text = "Analytics", command = lambda : finances_page(contacts)).grid(row = 6, column = 6, columnspan = 2)
+
+def item_add(the_item, the_amount, the_location, the_type, time_text, update_this):
+    if (the_item == "Item"):
+        update_this.set("Can't use default")
+    elif (len(the_item) < 1):
+        update_this.set("Need first name")
+    else:
+        try:
+            item_detail_read = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/item_list.txt", "r")
+            last_line = item_detail_read.read().splitlines()[-1]
+            last_id = int(last_line.split("|")[0])
+            item_detail_read.close()
+            item_detail_append = open(str(working_directory) + "/" + your_alias.replace(" ","") + "/item_list.txt", "a")
+            item_detail_append.write(str(last_id + 1) + "|" + the_item + "|" + the_amount + "|" + the_location + "|" + the_type + "|" + time_text + "|" +  today.strftime("%d/%m/%Y") + "\n")
+            item_detail_append.close()
+            update_this.set("Added " + the_item)
+        except:
+            item_file = os.path.join(str(working_directory) + "/" + your_alias.replace(" ","") + "/item_list.txt")
+            item_file_open = open(item_file, "w")
+            item_file_open.write("1|" + the_item + "|" + the_amount + "|" + the_location + "|" + the_type + "|" + time_text + "|" +  today.strftime("%d/%m/%Y") + "\n")
+            item_file_open.close()
+            update_this.set(the_item + " is your first item !")
+
+def currency_stuff():
+    all_currency_list = Tk()
+    all_currency_list.wm_title("AbuMoola - Currency List")
+    all_currency_list.configure(bg = 'black')
+
+    currency_list = ("MYR: Malaysian Ringgit, ISK: Icelandic Krona,\nEEK: Estonian kroon, HKD: Hong Kong Dollar,\nIDR: Indonesian Rupiah, CAD: Canadian Dollar,\nHUF: Hungarian forint, PLN: Poland zloty,\nBRL: Brazilian real, MXN: Mexican Peso,\nNOK: Norwegian Krone, BGN: Bulgarian Lev,\nTHB: Malaysian Ringgit, HRK: Icelandic Krona,\nCZK: Estonian kroon, DKK: Hong Kong Dollar,\nCYP: Indonesian Rupiah, RUB: Canadian Dollar,\nPHP: Hungarian forint, ILS: Poland zloty,\nEUR: Brazilian real, TRL: Mexican Peso,\nSEK: Norwegian Krone, TRY: Bulgarian Lev,\nLTL: Lithuanian litas, MTL: Maltese Lira,\nAUD: Australian Dollar, SGD: Singapore Dollar,\nNZD: New Zealand Dollar, KRW: South Korean won,\nGBP: Great British Pound, LVL: Latvian lats,\nCHF: Swiss Franks, ZAR: South African Rand,\nUSD: United States Dollar, SKK: Slovak koruna,\nCNY: Chinese Yuan, JPY: Japanese Yen,\nINR: Indian Rupee, RON: Romanian Leu,\nSIT: Slovenian tolar, ROL: Romanian Leu")
+    Label(all_currency_list, font = ("Times", 40), foreground = 'white', bg = 'black', text = currency_list).pack()
 
 def contact_add(first_name, last_name, address, num_1, num_2, email, insta, extra, update_this):
     if (first_name == "First Name"):
@@ -269,6 +330,7 @@ def main_clock():
 
 
 ########### PREPARTAION ##################################
+currency_list = ["MYR", "ISK", "EEK", "HKD", "IDR", "CAD", "HUF", "PLN", "BRL", "MXN", "NOK", "BGN", "THB", "HRK", "CZK", "DKK", "CYP", "RUB", "PHP", "ILS", "EUR", "TRL", "SEK", "TRY", "LTL", "MTL", "AUD", "SGD", "KRW", "LVL", "SKK", "ZAR", "JPY", "RON", "ROL", "NZD", "GBP", "CHF", "USD", "CNY", "INR", "SIT"]
 
 working_directory = pathlib.Path(__file__).parent.absolute()
 

@@ -1,0 +1,1 @@
+1|Here|Amount|Location|Food|HH:MM:SS|31/01/2021
